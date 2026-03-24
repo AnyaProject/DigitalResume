@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Anya's Life – Digital Resume</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── ROOT & RESET ─────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream:   #fdf6ee;
+      --ink:     #1a1208;
+      --gold:    #c8964a;
+      --blush:   #e8b4a0;
+      --sage:    #8aab8e;
+      --sky:     #a8c5d4;
+      --lavender:#b8a8d4;
+      --coral:   #e07060;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ── CUSTOM CURSOR ────────────────────────────────── */
+    #cursor {
+      width: 14px; height: 14px;
+      background: var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: multiply;
+      transition: transform .15s ease, background .3s;
+    }
+    #cursor-trail {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transition: left .08s ease, top .08s ease, transform .15s;
+      opacity: .5;
+    }
+
+    /* ── HERO ─────────────────────────────────────────── */
+    #hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse at 20% 60%, #e8d5c080 0%, transparent 55%),
+        radial-gradient(ellipse at 80% 20%, #c8964a25 0%, transparent 50%),
+        var(--cream);
+    }
+
+    .hero-bg-text {
+      position: absolute;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(80px, 18vw, 220px);
+      font-style: italic;
+      color: transparent;
+      -webkit-text-stroke: 1.5px #c8964a30;
+      white-space: nowrap;
+      user-select: none;
+      pointer-events: none;
+      animation: drift 20s ease-in-out infinite alternate;
+    }
+    @keyframes drift { from { transform: translateX(-2%) rotate(-2deg); } to { transform: translateX(2%) rotate(2deg); } }
+
+    .hero-content { text-align: center; z-index: 2; }
+
+    .hero-eyebrow {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      letter-spacing: .35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 18px;
+      opacity: 0;
+      animation: fadeUp .8s .3s forwards;
+    }
+
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(42px, 8vw, 96px);
+      line-height: 1.05;
+      opacity: 0;
+      animation: fadeUp .9s .5s forwards;
+    }
+    .hero-title em { font-style: italic; color: var(--gold); }
+
+    .hero-sub {
+      margin-top: 16px;
+      font-size: 14px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #7a6a58;
+      opacity: 0;
+      animation: fadeUp .8s .8s forwards;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp .8s 1.2s forwards;
+    }
+    .scroll-hint span { font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: #9a8a78; }
+    .scroll-line {
+      width: 1px; height: 48px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse { 0%,100% { transform: scaleY(1); opacity:.6; } 50% { transform: scaleY(.6); opacity:1; } }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── PROGRESS BAR ─────────────────────────────────── */
+    #progress-bar {
+      position: fixed;
+      top: 0; left: 0;
+      height: 3px;
+      background: linear-gradient(to right, var(--gold), var(--coral));
+      width: 0%;
+      z-index: 1000;
+      transition: width .1s;
+    }
+
+    /* ── TIMELINE SECTION ─────────────────────────────── */
+    #timeline {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 80px 24px 120px;
+      position: relative;
+    }
+
+    /* vertical line */
+    #timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, transparent, var(--gold) 5%, var(--gold) 95%, transparent);
+      transform: translateX(-50%);
+    }
+
+    /* ── YEAR ENTRY ───────────────────────────────────── */
+    .year-block {
+      display: flex;
+      align-items: flex-start;
+      gap: 48px;
+      margin-bottom: 80px;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity .7s ease, transform .7s ease;
+    }
+    .year-block.visible { opacity: 1; transform: translateY(0); }
+
+    /* alternate sides */
+    .year-block:nth-child(even) { flex-direction: row-reverse; }
+    .year-block:nth-child(even) .year-card { text-align: right; }
+    .year-block:nth-child(even) .year-card .tags { justify-content: flex-end; }
+
+    /* dot on line */
+    .year-dot {
+      flex-shrink: 0;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--cream);
+      border: 2.5px solid var(--gold);
+      position: relative;
+      margin-top: 6px;
+      z-index: 2;
+      transition: transform .3s, background .3s;
+      cursor: default;
+    }
+    .year-block:hover .year-dot {
+      transform: scale(1.4);
+      background: var(--gold);
+    }
+
+    /* colored dot accent per age */
+    .year-block[data-age="0"]  .year-dot { border-color: var(--blush); }
+    .year-block[data-age="1"]  .year-dot { border-color: var(--sky); }
+    .year-block[data-age="2"]  .year-dot { border-color: var(--sage); }
+    .year-block[data-age="3"]  .year-dot { border-color: var(--lavender); }
+    .year-block[data-age="4"]  .year-dot { border-color: var(--coral); }
+    .year-block[data-age="5"]  .year-dot { border-color: var(--gold); }
+    .year-block[data-age="6"]  .year-dot { border-color: var(--blush); }
+    .year-block[data-age="7"]  .year-dot { border-color: var(--sky); }
+    .year-block[data-age="8"]  .year-dot { border-color: var(--sage); }
+    .year-block[data-age="9"]  .year-dot { border-color: var(--lavender); }
+    .year-block[data-age="10"] .year-dot { border-color: var(--coral); }
+    .year-block[data-age="11"] .year-dot { border-color: var(--gold); }
+    .year-block[data-age="12"] .year-dot { border-color: var(--blush); }
+    .year-block[data-age="13"] .year-dot { border-color: var(--sky); }
+    .year-block[data-age="14"] .year-dot { border-color: var(--sage); }
+    .year-block[data-age="15"] .year-dot { border-color: var(--lavender); }
+    .year-block[data-age="16"] .year-dot { border-color: var(--coral); }
+
+    /* card */
+    .year-card {
+      flex: 1;
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 32px;
+      box-shadow: 0 2px 18px #c8964a10, 0 1px 4px #00000008;
+      transition: box-shadow .3s, transform .3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .year-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(to right, var(--gold), var(--blush));
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .year-block:hover .year-card {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 36px #c8964a18, 0 2px 8px #00000010;
+    }
+    .year-block:hover .year-card::before { opacity: 1; }
+
+    .age-label {
+      font-size: 11px;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .year-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .year-desc {
+      font-size: 14px;
+      line-height: 1.75;
+      color: #5a4e42;
+    }
+
+    /* image placeholder */
+    .year-img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      border-radius: 10px;
+      margin-top: 18px;
+      background: linear-gradient(135deg, #f0e8de, #e8d5c4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: #c8a878;
+      border: 1.5px dashed #d4b890;
+      overflow: hidden;
+      position: relative;
+    }
+    .year-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 10px;
+    }
+    .year-img .img-placeholder-text {
+      position: absolute;
+    }
+
+    /* tags */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+    }
+    .tag {
+      font-size: 10px;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 100px;
+      background: var(--cream);
+      color: var(--ink);
+      font-weight: 500;
+      border: 1px solid #e0d4c4;
+    }
+
+    /* ── FOOTER ───────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 60px 24px;
+      border-top: 1px solid #e8ddd0;
+      font-size: 12px;
+      color: #9a8a78;
+      letter-spacing: .1em;
+    }
+    footer span { color: var(--gold); }
+
+    /* ── FLOATING AGE INDICATOR ───────────────────────── */
+    #age-indicator {
+      position: fixed;
+      right: 32px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .age-pip {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #d4c4b4;
+      transition: background .3s, transform .3s;
+      cursor: pointer;
+    }
+    .age-pip.active { background: var(--gold); transform: scale(1.6); }
+
+    /* ── RESPONSIVE ───────────────────────────────────── */
+    @media (max-width: 640px) {
+      #timeline::before { left: 18px; }
+      .year-block,
+      .year-block:nth-child(even) {
+        flex-direction: column;
+        gap: 16px;
+      }
+      .year-block:nth-child(even) .year-card { text-align: left; }
+      .year-block:nth-child(even) .year-card .tags { justify-content: flex-start; }
+      .year-dot { margin-left: 10px; }
+      #age-indicator { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+<div id="progress-bar"></div>
+
+<!-- ── HERO ───────────────────────────────────── -->
+<section id="hero">
+  <div class="hero-bg-text">Anya</div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">A life in chapters</p>
+    <h1 class="hero-title">Anya's Life<br><em>aka my digital résumé</em></h1>
+    <p class="hero-sub">Age 0 → 16 &nbsp;·&nbsp; Scroll to explore</p>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ── TIMELINE ────────────────────────────────── -->
+<section id="timeline">
+
+  <!-- AGE 0 -->
+  <div class="year-block" data-age="0" id="age-0">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 0 · Year one</p>
+      <h2 class="year-title">Hello, World 🌍</h2>
+      <p class="year-desc">This is where you write about being born — the city, a fun fact, who was there. Make it personal and warm!</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add your baby photo here</span></div>
+      <div class="tags">
+        <span class="tag">Born</span>
+        <span class="tag">✨ New arrival</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- AGE 1 -->
+  <div class="year-block" data-age="1" id="age-1">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 1 · First steps</p>
+      <h2 class="year-title">First Steps &amp; First Words</h2>
+      <p class="year-desc">Write about your first milestone here — walking, talking, a funny moment your parents love to tell.</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Milestone</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 2 -->
+  <div class="year-block" data-age="2" id="age-2">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 2</p>
+      <h2 class="year-title">The Toddler Era 🎨</h2>
+      <p class="year-desc">What were you obsessed with? Favourite toy, show, food? Paint a picture of tiny Anya.</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Curiosity</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 3 -->
+  <div class="year-block" data-age="3" id="age-3">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 3</p>
+      <h2 class="year-title">Personality Unlocked</h2>
+      <p class="year-desc">What made you YOU at this age? Stubborn? Fearless? Tell us something that's still true today.</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Character</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 4 -->
+  <div class="year-block" data-age="4" id="age-4">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 4</p>
+      <h2 class="year-title">Adventures Begin 🌟</h2>
+      <p class="year-desc">A trip, a friend, a new hobby — what's a standout memory from this year?</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Adventure</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 5 -->
+  <div class="year-block" data-age="5" id="age-5">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 5 · School starts</p>
+      <h2 class="year-title">First Day of School 🎒</h2>
+      <p class="year-desc">Big feelings, new backpack, nervous excitement. Tell us how that felt.</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">School</span><span class="tag">Achievement</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 6 -->
+  <div class="year-block" data-age="6" id="age-6">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 6</p>
+      <h2 class="year-title">My Best Friend Era 👯</h2>
+      <p class="year-desc">Friendships, favourite teachers, after-school activities. Who shaped this year?</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Friends</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 7 -->
+  <div class="year-block" data-age="7" id="age-7">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 7</p>
+      <h2 class="year-title">A New Passion 🎵</h2>
+      <p class="year-desc">Did you discover a sport, an instrument, art? Write about finding something you loved.</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Hobby</span><span class="tag">Passion</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 8 -->
+  <div class="year-block" data-age="8" id="age-8">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 8</p>
+      <h2 class="year-title">Challenge Accepted 🏅</h2>
+      <p class="year-desc">An achievement, a competition, something you worked hard for. Brag a little!</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Achievement</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 9 -->
+  <div class="year-block" data-age="9" id="age-9">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 9</p>
+      <h2 class="year-title">The Big Trip ✈️</h2>
+      <p class="year-desc">A place you visited, a family event, something memorable that happened in the world.</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Travel</span><span class="tag">Memory</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 10 -->
+  <div class="year-block" data-age="10" id="age-10">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 10 · Double digits!</p>
+      <h2 class="year-title">Double Digits 🎉</h2>
+      <p class="year-desc">The big 1-0! How did you celebrate? What did it feel like to be 10?</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Birthday</span><span class="tag">Milestone</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 11 -->
+  <div class="year-block" data-age="11" id="age-11">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 11</p>
+      <h2 class="year-title">Growing Up Fast 🌱</h2>
+      <p class="year-desc">Things started shifting — new interests, new responsibilities. What changed?</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Growth</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 12 -->
+  <div class="year-block" data-age="12" id="age-12">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 12</p>
+      <h2 class="year-title">Middle School Begins 📚</h2>
+      <p class="year-desc">New school? New people? Describe the vibe of this chapter.</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">School</span><span class="tag">New chapter</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 13 -->
+  <div class="year-block" data-age="13" id="age-13">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 13 · Teenager</p>
+      <h2 class="year-title">Officially a Teen 🎭</h2>
+      <p class="year-desc">Welcome to the teenager years. What did you care about? What were you into?</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Teenager</span><span class="tag">Identity</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 14 -->
+  <div class="year-block" data-age="14" id="age-14">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 14</p>
+      <h2 class="year-title">Finding My Voice 🎤</h2>
+      <p class="year-desc">A moment you stood up for yourself, discovered your style, or figured something out.</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Voice</span><span class="tag">Confidence</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 15 -->
+  <div class="year-block" data-age="15" id="age-15">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 15</p>
+      <h2 class="year-title">Bigger Dreams 🌠</h2>
+      <p class="year-desc">What are you working towards? Goals, ambitions, a project you're proud of.</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
+      <div class="tags"><span class="tag">Goals</span><span class="tag">Dreams</span></div>
+    </div>
+  </div>
+
+  <!-- AGE 16 -->
+  <div class="year-block" data-age="16" id="age-16">
+    <div class="year-dot"></div>
+    <div class="year-card">
+      <p class="age-label">Age 16 · Present day</p>
+      <h2 class="year-title">Right Now ✨</h2>
+      <p class="year-desc">Where are you today? What are you excited about? What's next for Anya?</p>
+      <div class="year-img"><span class="img-placeholder-text">📷 Add your favourite photo of yourself</span></div>
+      <div class="tags">
+        <span class="tag">Present</span>
+        <span class="tag">Future ahead</span>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ── FLOATING SIDE NAV ────────────────────────── -->
+<nav id="age-indicator" aria-label="Jump to age">
+  <!-- generated by JS -->
+</nav>
+
+<footer>
+  Made with love &nbsp;·&nbsp; <span>Anya's Life</span> &nbsp;·&nbsp; Age 0–16
+</footer>
+
+<script>
+  /* ── CURSOR ──────────────────────────────────── */
+  const cur = document.getElementById('cursor');
+  const trail = document.getElementById('cursor-trail');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = e.clientX - 7 + 'px';
+    cur.style.top  = e.clientY - 7 + 'px';
+    setTimeout(() => {
+      trail.style.left = e.clientX - 18 + 'px';
+      trail.style.top  = e.clientY - 18 + 'px';
+    }, 60);
+  });
+
+  /* ── PROGRESS BAR ────────────────────────────── */
+  const bar = document.getElementById('progress-bar');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
+    bar.style.width = pct + '%';
+  });
+
+  /* ── SCROLL REVEAL ───────────────────────────── */
+  const blocks = document.querySelectorAll('.year-block');
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.15 });
+  blocks.forEach(b => obs.observe(b));
+
+  /* ── SIDE NAV PIPS ───────────────────────────── */
+  const nav = document.getElementById('age-indicator');
+  for (let i = 0; i <= 16; i++) {
+    const pip = document.createElement('div');
+    pip.className = 'age-pip';
+    pip.title = `Age ${i}`;
+    pip.addEventListener('click', () => {
+      document.getElementById(`age-${i}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    nav.appendChild(pip);
+  }
+
+  const pipEls = document.querySelectorAll('.age-pip');
+  const ageObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const idx = parseInt(e.target.dataset.age);
+        pipEls.forEach((p, i) => p.classList.toggle('active', i === idx));
+      }
+    });
+  }, { threshold: 0.5 });
+  blocks.forEach(b => ageObs.observe(b));
+
+  /* ── CARD TILT ON HOVER ──────────────────────── */
+  document.querySelectorAll('.year-card').forEach(card => {
+    card.addEventListener('mousemove', e => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - .5;
+      const y = (e.clientY - r.top)  / r.height - .5;
+      card.style.transform = `translateY(-4px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg)`;
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  });
+</script>
+</body>
+</html>
