@@ -1,673 +1,431 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Anya's Life – Digital Resume</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <style>
-    /* ── ROOT & RESET ─────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ענת רייכצין</title>
+<meta name="description" content="ענת רייכצין: הסיפור שלי, גיל אחרי גיל">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d12; --fg:#f4f5f8; --muted:#a7adbb; --accent:#7cc4ff; --accent2:#c49bff;
+    --card:rgba(255,255,255,.06); --line:rgba(255,255,255,.28);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Heebo',system-ui,sans-serif;background:var(--bg);color:var(--fg);
+    transition:background-color .9s ease;line-height:1.6;overflow-x:hidden}
+  img{display:block;max-width:100%;height:auto}
 
-    :root {
-      --cream:   #fdf6ee;
-      --ink:     #1a1208;
-      --gold:    #c8964a;
-      --blush:   #e8b4a0;
-      --sage:    #8aab8e;
-      --sky:     #a8c5d4;
-      --lavender:#b8a8d4;
-      --coral:   #e07060;
-    }
+  /* progress bar */
+  #progress{position:fixed;top:0;left:0;height:4px;width:0;z-index:60;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .1s linear}
+  [dir=rtl] #progress{left:auto;right:0;background:linear-gradient(270deg,var(--accent),var(--accent2))}
 
-    html { scroll-behavior: smooth; }
+  /* language switch */
+  #lang{position:fixed;top:14px;left:16px;z-index:70;font:inherit;font-weight:700;font-size:.9rem;
+    color:var(--fg);background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);
+    border-radius:999px;padding:.35em 1em;cursor:pointer;backdrop-filter:blur(8px)}
+  #lang:hover{background:rgba(255,255,255,.2)}
 
-    body {
-      background: var(--cream);
-      color: var(--ink);
-      font-family: 'DM Sans', sans-serif;
-      overflow-x: hidden;
-      cursor: none;
-    }
+  /* half-circle age badge, fixed on the left edge */
+  #ageDial{position:fixed;left:0;top:50%;z-index:45;width:118px;height:236px;margin-top:-118px;
+    border-radius:0 118px 118px 0;display:flex;flex-direction:column;justify-content:center;
+    padding-left:14px;text-align:center;width:118px;
+    background:linear-gradient(135deg,rgba(124,196,255,.22),rgba(196,155,255,.22));
+    border:1px solid rgba(255,255,255,.22);border-left:none;backdrop-filter:blur(10px);
+    box-shadow:0 10px 40px rgba(0,0,0,.35);transform:translateX(-105%);transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+  #ageDial.show{transform:none}
+  #ageDial .lbl{font-size:.8rem;color:var(--muted);font-weight:500}
+  #ageDial .num{font-size:2.1rem;font-weight:900;line-height:1.05;direction:ltr;transition:opacity .3s,transform .3s}
+  #ageDial .num.swap{opacity:0;transform:translateY(10px)}
 
-    /* ── CUSTOM CURSOR ────────────────────────────────── */
-    #cursor {
-      width: 14px; height: 14px;
-      background: var(--gold);
-      border-radius: 50%;
-      position: fixed;
-      pointer-events: none;
-      z-index: 9999;
-      mix-blend-mode: multiply;
-      transition: transform .15s ease, background .3s;
-    }
-    #cursor-trail {
-      width: 36px; height: 36px;
-      border: 1.5px solid var(--gold);
-      border-radius: 50%;
-      position: fixed;
-      pointer-events: none;
-      z-index: 9998;
-      transition: left .08s ease, top .08s ease, transform .15s;
-      opacity: .5;
-    }
+  /* timeline rail, right edge */
+  #rail{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:40;
+    display:flex;flex-direction:column;align-items:center;gap:24px;padding:14px 0}
+  #rail::before{content:"";position:absolute;top:0;bottom:0;left:50%;border-left:2px dashed var(--line);transform:translateX(-1px)}
+  #rail a{position:relative;width:14px;height:14px;border-radius:50%;background:var(--bg);
+    border:2px solid var(--line);transition:all .3s;display:block}
+  #rail a:hover,#rail a.active{background:var(--accent);border-color:var(--accent);transform:scale(1.35)}
+  #rail a span{position:absolute;right:24px;top:50%;transform:translateY(-50%);white-space:nowrap;
+    font-size:.78rem;color:var(--muted);opacity:0;pointer-events:none;transition:opacity .25s}
+  #rail a:hover span,#rail a.active span{opacity:1;color:var(--fg)}
 
-    /* ── HERO ─────────────────────────────────────────── */
-    #hero {
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-      background:
-        radial-gradient(ellipse at 20% 60%, #e8d5c080 0%, transparent 55%),
-        radial-gradient(ellipse at 80% 20%, #c8964a25 0%, transparent 50%),
-        var(--cream);
-    }
+  /* sections */
+  section{min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+    padding:96px 72px 96px 150px}
+  .inner{max-width:1100px;width:100%;margin:0 auto}
+  .kicker{color:var(--accent);font-weight:700;letter-spacing:.04em;font-size:1rem}
+  h2{font-size:clamp(2rem,5vw,3.6rem);font-weight:900;line-height:1.15;margin:.15em 0 .45em;letter-spacing:-.01em}
+  h3{font-size:clamp(1.3rem,2.8vw,1.9rem);font-weight:700;margin:2.4em 0 .4em}
+  p.lead{font-size:clamp(1.05rem,1.8vw,1.3rem);color:var(--muted);max-width:56ch;font-weight:300}
+  ul.facts{list-style:none;margin:1.3em 0;display:flex;flex-wrap:wrap;gap:10px}
+  ul.facts li{background:var(--card);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:.45em 1.05em;font-size:.95rem}
+  ul.facts li b{color:var(--accent)}
 
-    .hero-bg-text {
-      position: absolute;
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(80px, 18vw, 220px);
-      font-style: italic;
-      color: transparent;
-      -webkit-text-stroke: 1.5px #c8964a30;
-      white-space: nowrap;
-      user-select: none;
-      pointer-events: none;
-      animation: drift 20s ease-in-out infinite alternate;
-    }
-    @keyframes drift { from { transform: translateX(-2%) rotate(-2deg); } to { transform: translateX(2%) rotate(2deg); } }
+  /* galleries: never crop, natural aspect ratio */
+  .gallery{display:grid;gap:16px;margin-top:1.6em;align-items:start}
+  .g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  figure{position:relative;background:var(--card);border-radius:16px;padding:10px;
+    border:1px solid rgba(255,255,255,.1);cursor:zoom-in;transition:transform .3s,border-color .3s}
+  figure:hover{transform:translateY(-4px);border-color:rgba(124,196,255,.5)}
+  figure img{width:100%;height:auto;object-fit:contain;border-radius:10px}
+  figure::after{content:"⤢";position:absolute;bottom:8px;left:10px;width:24px;height:24px;border-radius:50%;
+    display:grid;place-items:center;font-size:.8rem;background:rgba(255,255,255,.12);color:#fff;opacity:.7;transition:opacity .3s}
+  figure:hover::after{opacity:1}
+  figcaption{font-size:.85rem;color:var(--muted);padding:8px 30px 2px;text-align:center}
+  .single{max-width:560px;margin-inline:auto}
+  .wide{grid-column:1/-1}
+  .hint{font-size:.85rem;color:var(--muted);margin-top:.6em}
 
-    .hero-content { text-align: center; z-index: 2; }
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:1.6em}
+  .card{background:var(--card);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:22px}
+  .card .ico{font-size:1.8rem;line-height:1;margin-bottom:.4em}
+  .card h4{font-size:1.3rem;margin-bottom:.25em}
+  .card p{color:var(--muted);font-size:.98rem}
+  .tag{display:inline-block;font-size:.75rem;padding:.15em .7em;border-radius:999px;background:rgba(124,196,255,.15);color:var(--accent);margin-bottom:.6em}
 
-    .hero-eyebrow {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 11px;
-      letter-spacing: .35em;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 18px;
-      opacity: 0;
-      animation: fadeUp .8s .3s forwards;
-    }
+  /* hero */
+  #hero{text-align:center;align-items:center;padding-left:72px}
+  #hero h1{font-size:clamp(3rem,10vw,7.5rem);font-weight:900;line-height:1.05;letter-spacing:-.02em}
+  #hero p.lead{margin:1em auto 0}
+  #hero ul.facts{justify-content:center}
+  .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:1.6em}
+  .btn{font:inherit;font-weight:700;color:#0b0d12;background:linear-gradient(90deg,var(--accent),var(--accent2));
+    border:none;border-radius:999px;padding:.7em 1.6em;text-decoration:none;cursor:pointer;transition:transform .2s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.ghost{background:transparent;color:var(--fg);border:1px solid rgba(255,255,255,.35)}
+  .scroll-hint{margin-top:3em;color:var(--muted);font-size:.9rem;animation:bob 2s infinite}
+  @keyframes bob{50%{transform:translateY(8px)}}
 
-    .hero-title {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(42px, 8vw, 96px);
-      line-height: 1.05;
-      opacity: 0;
-      animation: fadeUp .9s .5s forwards;
-    }
-    .hero-title em { font-style: italic; color: var(--gold); }
+  /* fade-in */
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity .9s ease,transform .9s ease}
+  .reveal.in{opacity:1;transform:none}
 
-    .hero-sub {
-      margin-top: 16px;
-      font-size: 14px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: #7a6a58;
-      opacity: 0;
-      animation: fadeUp .8s .8s forwards;
-    }
+  /* lightbox */
+  #lb{position:fixed;inset:0;background:rgba(0,0,0,.93);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:100;padding:56px 64px 24px}
+  #lb.open{display:flex}
+  #lb img{max-width:100%;max-height:calc(100vh - 120px);width:auto;height:auto;object-fit:contain;border-radius:8px}
+  #lb .cap{color:#ddd;margin-top:12px;font-size:.95rem;text-align:center}
+  #lb button{position:absolute;font:inherit;font-size:1.6rem;color:#fff;background:rgba(255,255,255,.12);border:none;
+    width:48px;height:48px;border-radius:50%;cursor:pointer}
+  #lb button:hover{background:rgba(255,255,255,.25)}
+  #lbClose{top:14px;right:14px}
+  #lbPrev{left:12px;top:50%;margin-top:-24px}
+  #lbNext{right:12px;top:50%;margin-top:-24px}
 
-    .scroll-hint {
-      position: absolute;
-      bottom: 36px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      opacity: 0;
-      animation: fadeUp .8s 1.2s forwards;
-    }
-    .scroll-hint span { font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: #9a8a78; }
-    .scroll-line {
-      width: 1px; height: 48px;
-      background: linear-gradient(to bottom, var(--gold), transparent);
-      animation: scrollPulse 2s ease-in-out infinite;
-    }
-    @keyframes scrollPulse { 0%,100% { transform: scaleY(1); opacity:.6; } 50% { transform: scaleY(.6); opacity:1; } }
+  footer{text-align:center;padding:40px 16px;color:var(--muted);font-size:.85rem}
 
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ── PROGRESS BAR ─────────────────────────────────── */
-    #progress-bar {
-      position: fixed;
-      top: 0; left: 0;
-      height: 3px;
-      background: linear-gradient(to right, var(--gold), var(--coral));
-      width: 0%;
-      z-index: 1000;
-      transition: width .1s;
-    }
-
-    /* ── TIMELINE SECTION ─────────────────────────────── */
-    #timeline {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 80px 24px 120px;
-      position: relative;
-    }
-
-    /* vertical line */
-    #timeline::before {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 0; bottom: 0;
-      width: 1px;
-      background: linear-gradient(to bottom, transparent, var(--gold) 5%, var(--gold) 95%, transparent);
-      transform: translateX(-50%);
-    }
-
-    /* ── YEAR ENTRY ───────────────────────────────────── */
-    .year-block {
-      display: flex;
-      align-items: flex-start;
-      gap: 48px;
-      margin-bottom: 80px;
-      opacity: 0;
-      transform: translateY(40px);
-      transition: opacity .7s ease, transform .7s ease;
-    }
-    .year-block.visible { opacity: 1; transform: translateY(0); }
-
-    /* alternate sides */
-    .year-block:nth-child(even) { flex-direction: row-reverse; }
-    .year-block:nth-child(even) .year-card { text-align: right; }
-    .year-block:nth-child(even) .year-card .tags { justify-content: flex-end; }
-
-    /* dot on line */
-    .year-dot {
-      flex-shrink: 0;
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: var(--cream);
-      border: 2.5px solid var(--gold);
-      position: relative;
-      margin-top: 6px;
-      z-index: 2;
-      transition: transform .3s, background .3s;
-      cursor: default;
-    }
-    .year-block:hover .year-dot {
-      transform: scale(1.4);
-      background: var(--gold);
-    }
-
-    /* colored dot accent per age */
-    .year-block[data-age="0"]  .year-dot { border-color: var(--blush); }
-    .year-block[data-age="1"]  .year-dot { border-color: var(--sky); }
-    .year-block[data-age="2"]  .year-dot { border-color: var(--sage); }
-    .year-block[data-age="3"]  .year-dot { border-color: var(--lavender); }
-    .year-block[data-age="4"]  .year-dot { border-color: var(--coral); }
-    .year-block[data-age="5"]  .year-dot { border-color: var(--gold); }
-    .year-block[data-age="6"]  .year-dot { border-color: var(--blush); }
-    .year-block[data-age="7"]  .year-dot { border-color: var(--sky); }
-    .year-block[data-age="8"]  .year-dot { border-color: var(--sage); }
-    .year-block[data-age="9"]  .year-dot { border-color: var(--lavender); }
-    .year-block[data-age="10"] .year-dot { border-color: var(--coral); }
-    .year-block[data-age="11"] .year-dot { border-color: var(--gold); }
-    .year-block[data-age="12"] .year-dot { border-color: var(--blush); }
-    .year-block[data-age="13"] .year-dot { border-color: var(--sky); }
-    .year-block[data-age="14"] .year-dot { border-color: var(--sage); }
-    .year-block[data-age="15"] .year-dot { border-color: var(--lavender); }
-    .year-block[data-age="16"] .year-dot { border-color: var(--coral); }
-
-    /* card */
-    .year-card {
-      flex: 1;
-      background: #fff;
-      border-radius: 16px;
-      padding: 28px 32px;
-      box-shadow: 0 2px 18px #c8964a10, 0 1px 4px #00000008;
-      transition: box-shadow .3s, transform .3s;
-      position: relative;
-      overflow: hidden;
-    }
-    .year-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(to right, var(--gold), var(--blush));
-      opacity: 0;
-      transition: opacity .3s;
-    }
-    .year-block:hover .year-card {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 36px #c8964a18, 0 2px 8px #00000010;
-    }
-    .year-block:hover .year-card::before { opacity: 1; }
-
-    .age-label {
-      font-size: 11px;
-      letter-spacing: .3em;
-      text-transform: uppercase;
-      color: var(--gold);
-      font-weight: 500;
-      margin-bottom: 6px;
-    }
-
-    .year-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 22px;
-      line-height: 1.2;
-      margin-bottom: 10px;
-    }
-
-    .year-desc {
-      font-size: 14px;
-      line-height: 1.75;
-      color: #5a4e42;
-    }
-
-    /* image placeholder */
-    .year-img {
-      width: 100%;
-      aspect-ratio: 16/9;
-      border-radius: 10px;
-      margin-top: 18px;
-      background: linear-gradient(135deg, #f0e8de, #e8d5c4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      letter-spacing: .2em;
-      text-transform: uppercase;
-      color: #c8a878;
-      border: 1.5px dashed #d4b890;
-      overflow: hidden;
-      position: relative;
-    }
-    .year-img img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-    .year-img .img-placeholder-text {
-      position: absolute;
-    }
-
-    /* tags */
-    .tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 14px;
-    }
-    .tag {
-      font-size: 10px;
-      letter-spacing: .15em;
-      text-transform: uppercase;
-      padding: 4px 10px;
-      border-radius: 100px;
-      background: var(--cream);
-      color: var(--ink);
-      font-weight: 500;
-      border: 1px solid #e0d4c4;
-    }
-
-    /* ── FOOTER ───────────────────────────────────────── */
-    footer {
-      text-align: center;
-      padding: 60px 24px;
-      border-top: 1px solid #e8ddd0;
-      font-size: 12px;
-      color: #9a8a78;
-      letter-spacing: .1em;
-    }
-    footer span { color: var(--gold); }
-
-    /* ── FLOATING AGE INDICATOR ───────────────────────── */
-    #age-indicator {
-      position: fixed;
-      right: 32px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 100;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .age-pip {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: #d4c4b4;
-      transition: background .3s, transform .3s;
-      cursor: pointer;
-    }
-    .age-pip.active { background: var(--gold); transform: scale(1.6); }
-
-    /* ── RESPONSIVE ───────────────────────────────────── */
-    @media (max-width: 640px) {
-      #timeline::before { left: 18px; }
-      .year-block,
-      .year-block:nth-child(even) {
-        flex-direction: column;
-        gap: 16px;
-      }
-      .year-block:nth-child(even) .year-card { text-align: left; }
-      .year-block:nth-child(even) .year-card .tags { justify-content: flex-start; }
-      .year-dot { margin-left: 10px; }
-      #age-indicator { display: none; }
-    }
-  </style>
+  @media (max-width:820px){
+    .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+    section{padding:80px 40px 80px 74px}
+    #hero{padding-left:40px}
+    #ageDial{width:64px;height:128px;margin-top:-64px;border-radius:0 64px 64px 0;padding-left:4px}
+    #ageDial .num{font-size:1.05rem}
+    #ageDial .lbl{font-size:.62rem}
+    #rail{right:10px;gap:16px}
+    #rail a{width:11px;height:11px}
+    #rail a span{display:none}
+    #lb{padding:56px 8px 16px}
+    #lbPrev,#lbNext{top:auto;bottom:14px;margin-top:0}
+  }
+  @media (max-width:480px){ .g2{grid-template-columns:1fr} }
+  @media (prefers-reduced-motion:reduce){ .reveal{opacity:1;transform:none;transition:none} html{scroll-behavior:auto} }
+</style>
 </head>
 <body>
+<div id="progress"></div>
+<button id="lang" type="button" aria-label="Switch language">English</button>
+<div id="ageDial" aria-hidden="true"><div class="lbl"></div><div class="num"></div></div>
+<nav id="rail" aria-label="ציר זמן"></nav>
 
-<div id="cursor"></div>
-<div id="cursor-trail"></div>
-<div id="progress-bar"></div>
-
-<!-- ── HERO ───────────────────────────────────── -->
-<section id="hero">
-  <div class="hero-bg-text">Anya</div>
-  <div class="hero-content">
-    <p class="hero-eyebrow">A life in chapters</p>
-    <h1 class="hero-title">Anya's Life<br><em>aka my digital résumé</em></h1>
-    <p class="hero-sub">Age 0 → 16 &nbsp;·&nbsp; Scroll to explore</p>
-  </div>
-  <div class="scroll-hint">
-    <span>Scroll</span>
-    <div class="scroll-line"></div>
+<!-- HERO -->
+<section id="hero" data-bg="#0b0d12" data-label="פתיחה" data-label-en="Intro">
+  <div class="inner reveal">
+    <h1 data-en="Anat Raykhtsin">ענת רייכצין</h1>
+    <div class="scroll-hint" data-en="↓ Scroll to begin">↓ גללו כדי להתחיל</div>
   </div>
 </section>
 
-<!-- ── TIMELINE ────────────────────────────────── -->
-<section id="timeline">
-
-  <!-- AGE 0 -->
-  <div class="year-block" data-age="0" id="age-0">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 0 · Year one</p>
-      <h2 class="year-title">Hello, World 🌍</h2>
-      <p class="year-desc">This is where you write about being born — the city, a fun fact, who was there. Make it personal and warm!</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add your baby photo here</span></div>
-      <div class="tags">
-        <span class="tag">Born</span>
-        <span class="tag">✨ New arrival</span>
-      </div>
+<!-- AGES 6–12 -->
+<section id="elementary" data-bg="#141a33" data-age="6–12" data-label="גילאי 6–12" data-label-en="Ages 6–12">
+  <div class="inner">
+    <div class="reveal">
+      <div class="kicker" data-en="Elementary · Weizmann School, Rehovot">יסודי · בית ספר ויצמן, רחובות</div>
+      <h2 data-en="Gifted, Amirim and top grades">מחוננים, אמירים וציונים גבוהים</h2>
+      <p class="lead" data-en="Already in elementary school I joined the excellence programs: the gifted program at the P.L.A. center, the Amirim program in math, art and social values, and certificates of excellence for my achievements. At 12 I was accepted to Bar-Ilan's math program for gifted youth.">כבר ביסודי הצטרפתי לתוכניות המצוינות: תוכנית המחוננים במרכז פ.ל.א., תוכנית אמירים במתמטיקה, אמנות וחברתי-ערכי, ותעודות הצטיינות על ההישגים שלי. בגיל 12 התקבלתי לתוכנית למחוננים במתמטיקה של בר-אילן.</p>
+      <ul class="facts">
+        <li data-en="<b>Gifted</b> · weekly enrichment day"><b>מחוננים</b> · יום העשרה שבועי</li>
+        <li data-en="<b>P.L.A.</b> · gifted center, 2 years"><b>פ.ל.א.</b> · מרכז למחוננים, שנתיים</li>
+        <li data-en="<b>Amirim</b> · math, art, social values"><b>אמירים</b> · מתמטיקה, אמנות, חברתי-ערכי</li>
+        <li data-en="Math <b>100</b> · English <b>100</b>">מתמטיקה <b>100</b> · אנגלית <b>100</b></li>
+        <li data-en="<b>Bar-Ilan</b> · math for gifted youth"><b>בר-אילן</b> · מתמטיקה למחוננים</li>
+      </ul>
+      <p class="hint" data-en="Click any photo to enlarge it">לחצו על תמונה כדי להגדיל אותה</p>
+    </div>
+    <div class="gallery g4 reveal">
+      <figure><img src="images/pla-tashpa.webp" alt="תעודת סיום שנה במרכז פ.ל.א. למחוננים" data-en-alt="P.L.A. gifted center certificate" loading="lazy"><figcaption data-en="P.L.A. gifted center · 2020">פ.ל.א. למחוננים · תש"פ</figcaption></figure>
+      <figure><img src="images/pla-grade6.webp" alt="תעודת סיום שנה במרכז פ.ל.א. למחוננים, כיתה ו'" data-en-alt="P.L.A. gifted center certificate, 6th grade" loading="lazy"><figcaption data-en="P.L.A. gifted center · 6th grade">פ.ל.א. למחוננים · כיתה ו'</figcaption></figure>
+      <figure><img src="images/amirim-2019.webp" alt="תעודת השתתפות בתוכנית אמירים, 2019" data-en-alt="Amirim program certificate, 2019" loading="lazy"><figcaption data-en="Amirim · 2019">אמירים · 2019</figcaption></figure>
+      <figure><img src="images/amirim-grade5.webp" alt="תעודת השתתפות בתוכנית אמירים, כיתה ה'" data-en-alt="Amirim program certificate, 5th grade" loading="lazy"><figcaption data-en="Amirim · 5th grade">אמירים · כיתה ה'</figcaption></figure>
+      <figure><img src="images/haaracha-1.webp" alt="תעודת הערכה, מצטיינת לימודית" data-en-alt="Certificate of excellence" loading="lazy"><figcaption data-en="Certificate of excellence · academics">תעודת הצטיינות · מצטיינת לימודית</figcaption></figure>
+      <figure><img src="images/haaracha-2.webp" alt="תעודת הערכה" data-en-alt="Certificate of excellence" loading="lazy"><figcaption data-en="Certificate of excellence">תעודת הצטיינות</figcaption></figure>
+      <figure><img src="images/skills-report.webp" alt="דוח מיומנויות: מתמטיקה 100, אנגלית 100" data-en-alt="Skills report: math 100, English 100" loading="lazy"><figcaption data-en="Skills report · math 100, English 100">דוח מיומנויות · מתמטיקה 100, אנגלית 100</figcaption></figure>
+      <figure><img src="images/bar-ilan-acceptance.webp" alt="מכתב קבלה לתוכנית ההעשרה המתמטית של בר-אילן" data-en-alt="Acceptance letter to Bar-Ilan's math program for gifted youth" loading="lazy"><figcaption data-en="Accepted to Bar-Ilan's gifted math program · age 12">קבלה לתוכנית המתמטיקה של בר-אילן · גיל 12</figcaption></figure>
     </div>
   </div>
-
-  <!-- AGE 1 -->
-  <div class="year-block" data-age="1" id="age-1">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 1 · First steps</p>
-      <h2 class="year-title">First Steps &amp; First Words</h2>
-      <p class="year-desc">Write about your first milestone here — walking, talking, a funny moment your parents love to tell.</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Milestone</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 2 -->
-  <div class="year-block" data-age="2" id="age-2">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 2</p>
-      <h2 class="year-title">The Toddler Era 🎨</h2>
-      <p class="year-desc">What were you obsessed with? Favourite toy, show, food? Paint a picture of tiny Anya.</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Curiosity</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 3 -->
-  <div class="year-block" data-age="3" id="age-3">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 3</p>
-      <h2 class="year-title">Personality Unlocked</h2>
-      <p class="year-desc">What made you YOU at this age? Stubborn? Fearless? Tell us something that's still true today.</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Character</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 4 -->
-  <div class="year-block" data-age="4" id="age-4">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 4</p>
-      <h2 class="year-title">Adventures Begin 🌟</h2>
-      <p class="year-desc">A trip, a friend, a new hobby — what's a standout memory from this year?</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Adventure</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 5 -->
-  <div class="year-block" data-age="5" id="age-5">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 5 · School starts</p>
-      <h2 class="year-title">First Day of School 🎒</h2>
-      <p class="year-desc">Big feelings, new backpack, nervous excitement. Tell us how that felt.</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">School</span><span class="tag">Achievement</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 6 -->
-  <div class="year-block" data-age="6" id="age-6">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 6</p>
-      <h2 class="year-title">My Best Friend Era 👯</h2>
-      <p class="year-desc">Friendships, favourite teachers, after-school activities. Who shaped this year?</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Friends</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 7 -->
-  <div class="year-block" data-age="7" id="age-7">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 7</p>
-      <h2 class="year-title">A New Passion 🎵</h2>
-      <p class="year-desc">Did you discover a sport, an instrument, art? Write about finding something you loved.</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Hobby</span><span class="tag">Passion</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 8 -->
-  <div class="year-block" data-age="8" id="age-8">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 8</p>
-      <h2 class="year-title">Challenge Accepted 🏅</h2>
-      <p class="year-desc">An achievement, a competition, something you worked hard for. Brag a little!</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Achievement</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 9 -->
-  <div class="year-block" data-age="9" id="age-9">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 9</p>
-      <h2 class="year-title">The Big Trip ✈️</h2>
-      <p class="year-desc">A place you visited, a family event, something memorable that happened in the world.</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Travel</span><span class="tag">Memory</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 10 -->
-  <div class="year-block" data-age="10" id="age-10">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 10 · Double digits!</p>
-      <h2 class="year-title">Double Digits 🎉</h2>
-      <p class="year-desc">The big 1-0! How did you celebrate? What did it feel like to be 10?</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Birthday</span><span class="tag">Milestone</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 11 -->
-  <div class="year-block" data-age="11" id="age-11">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 11</p>
-      <h2 class="year-title">Growing Up Fast 🌱</h2>
-      <p class="year-desc">Things started shifting — new interests, new responsibilities. What changed?</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Growth</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 12 -->
-  <div class="year-block" data-age="12" id="age-12">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 12</p>
-      <h2 class="year-title">Middle School Begins 📚</h2>
-      <p class="year-desc">New school? New people? Describe the vibe of this chapter.</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">School</span><span class="tag">New chapter</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 13 -->
-  <div class="year-block" data-age="13" id="age-13">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 13 · Teenager</p>
-      <h2 class="year-title">Officially a Teen 🎭</h2>
-      <p class="year-desc">Welcome to the teenager years. What did you care about? What were you into?</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Teenager</span><span class="tag">Identity</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 14 -->
-  <div class="year-block" data-age="14" id="age-14">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 14</p>
-      <h2 class="year-title">Finding My Voice 🎤</h2>
-      <p class="year-desc">A moment you stood up for yourself, discovered your style, or figured something out.</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Voice</span><span class="tag">Confidence</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 15 -->
-  <div class="year-block" data-age="15" id="age-15">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 15</p>
-      <h2 class="year-title">Bigger Dreams 🌠</h2>
-      <p class="year-desc">What are you working towards? Goals, ambitions, a project you're proud of.</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add a photo</span></div>
-      <div class="tags"><span class="tag">Goals</span><span class="tag">Dreams</span></div>
-    </div>
-  </div>
-
-  <!-- AGE 16 -->
-  <div class="year-block" data-age="16" id="age-16">
-    <div class="year-dot"></div>
-    <div class="year-card">
-      <p class="age-label">Age 16 · Present day</p>
-      <h2 class="year-title">Right Now ✨</h2>
-      <p class="year-desc">Where are you today? What are you excited about? What's next for Anya?</p>
-      <div class="year-img"><span class="img-placeholder-text">📷 Add your favourite photo of yourself</span></div>
-      <div class="tags">
-        <span class="tag">Present</span>
-        <span class="tag">Future ahead</span>
-      </div>
-    </div>
-  </div>
-
 </section>
 
-<!-- ── FLOATING SIDE NAV ────────────────────────── -->
-<nav id="age-indicator" aria-label="Jump to age">
-  <!-- generated by JS -->
-</nav>
+<!-- AGES 13–16 -->
+<section id="teens" data-bg="#0f2a24" data-age="13–16" data-label="גילאי 13–16" data-label-en="Ages 13–16">
+  <div class="inner">
+    <div class="reveal">
+      <div class="kicker" data-en="Middle school & high school">חטיבת ביניים ותיכון</div>
+      <h2 data-en="The heavy majors, with grades to match">המגמות הכבדות, עם ציונים בהתאם</h2>
+      <p class="lead" data-en="Almost all &quot;excellent&quot; in middle school, then the most demanding majors in high school.">כמעט רק "מצוין" בחטיבה, ואחר כך המגמות הכי תובעניות בתיכון.</p>
+    </div>
+    <div class="gallery reveal">
+      <figure class="single" style="max-width:820px"><img src="images/middle-school-grade9.webp" alt="תעודת ציונים, כיתה ט'" data-en-alt="9th grade report card" loading="lazy"><figcaption data-en="Middle school report card · 9th grade">תעודה מחטיבת הביניים · כיתה ט'</figcaption></figure>
+    </div>
 
-<footer>
-  Made with love &nbsp;·&nbsp; <span>Anya's Life</span> &nbsp;·&nbsp; Age 0–16
-</footer>
+    <div class="reveal">
+      <h3 data-en="Lots of after-school activities = flexibility">הרבה חוגים = גמישות</h3>
+      <p class="lead" data-en="I did many after-school activities over the years, and they gave me real flexibility.">לאורך השנים הייתי בהמון חוגים, והם נתנו לי גמישות אמיתית.</p>
+    </div>
+    <div class="gallery g2 reveal" style="max-width:760px">
+      <figure><img src="images/flex-needle.webp" alt="ענת בשפגט בעמידה" data-en-alt="Anat in a standing split" loading="lazy"><figcaption data-en="Standing split">שפגט בעמידה</figcaption></figure>
+      <figure><img src="images/flex-wall-split.webp" alt="ענת בשפגט על הקיר" data-en-alt="Anat in a split against the wall" loading="lazy"><figcaption data-en="Wall split">שפגט על הקיר</figcaption></figure>
+    </div>
+
+    <div class="reveal">
+      <h3 data-en="My ski journey">מסע הסקי שלי</h3>
+      <p class="lead" data-en="I started skiing at 12. Today I'm on my way to becoming a ski instructor.">התחלתי לגלוש בגיל 12, והיום אני בדרך להיות מדריכת סקי.</p>
+    </div>
+    <div class="gallery reveal">
+      <figure class="single" style="max-width:480px"><img src="images/ski-mountain.webp" alt="ענת על מסלול סקי עם נוף הרים מושלגים" data-en-alt="Anat on a ski slope with snowy mountains" loading="lazy"><figcaption data-en="On the mountain">על ההר</figcaption></figure>
+    </div>
+
+    <div class="reveal">
+      <h3 data-en="My bagrut (matriculation) grades">ציוני הבגרות שלי</h3>
+      <ul class="facts">
+        <li data-en="Software engineering <b>10 units</b>">הנדסת תוכנה <b>10 יח"ל</b></li>
+        <li data-en="Math <b>5 units</b>">מתמטיקה <b>5 יח"ל</b></li>
+        <li data-en="Physics <b>5 units</b>">פיזיקה <b>5 יח"ל</b></li>
+      </ul>
+      <ul class="facts">
+        <li data-en="Computer science <b>96</b>">מדעי המחשב <b>96</b></li>
+        <li data-en="Math (5 units) <b>96</b>">מתמטיקה 5 יח"ל <b>96</b></li>
+        <li data-en="English <b>99</b>">אנגלית <b>99</b></li>
+        <li data-en="History <b>100</b> · <b>92</b>">היסטוריה <b>100</b> · <b>92</b></li>
+        <li data-en="General studies <b>100</b> · <b>97</b>">השכלה כללית <b>100</b> · <b>97</b></li>
+      </ul>
+    </div>
+    <div class="gallery g2 reveal">
+      <figure><img src="images/bagrut-cs-math.png" alt="ציוני בגרות: מדעי המחשב ומתמטיקה" data-en-alt="Bagrut grades: computer science and math" loading="lazy"><figcaption data-en="Computer science and math">מדעי המחשב ומתמטיקה</figcaption></figure>
+      <figure><img src="images/bagrut-english-history.png" alt="ציוני בגרות: אנגלית, היסטוריה והשכלה כללית" data-en-alt="Bagrut grades: English, history and general studies" loading="lazy"><figcaption data-en="English, history and general studies">אנגלית, היסטוריה והשכלה כללית</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- JUDO -->
+<section id="judo" data-bg="#2a1416" data-age="16–17" data-label="ג'ודו וסמבו" data-label-en="Judo & Sambo">
+  <div class="inner">
+    <div class="reveal">
+      <div class="kicker" data-en="On the mat">על המזרן</div>
+      <h2 data-en="Judo & Sambo">ג'ודו וסמבו</h2>
+      <p class="lead" data-en="Israel Sambo champion, certified judo instructor, and today I teach the next generation.">אלופת ישראל בסמבו, מדריכת ג'ודו מוסמכת, והיום אני מלמדת את הדור הבא.</p>
+      <ul class="facts">
+        <li data-en="🥇 <b>Israel champion</b> · Sambo">🥇 <b>אלופת ישראל</b> · סמבו</li>
+        <li data-en="Certified judo instructor · <b>Israeli College of Sports</b>">מדריכת ג'ודו מוסמכת · <b>המכללה הישראלית לספורט</b></li>
+        <li data-en="Teaching kids' groups">מלמדת קבוצות ילדים</li>
+      </ul>
+    </div>
+    <div class="gallery g2 reveal">
+      <figure><img src="images/sambo-champion.webp" alt="ענת במקום הראשון בפודיום של איגוד הסמבו בישראל" data-en-alt="Anat in first place on the Israel Sambo Federation podium" loading="lazy"><figcaption data-en="1st place · Israel Sambo Federation">מקום ראשון · איגוד הסמבו בישראל</figcaption></figure>
+      <figure><img src="images/judo-instructor-cert.jpg" alt="תעודת מדריכת ג'ודו מהמכללה הישראלית לספורט" data-en-alt="Judo instructor certificate, Israeli College of Sports" loading="lazy"><figcaption data-en="Judo instructor certificate · 2025">תעודת מדריכת ג'ודו · 2025</figcaption></figure>
+      <figure><img src="images/judo-teaching-1.webp" alt="ענת עם תלמידי ג'ודו שקיבלו חגורות ותעודות" data-en-alt="Anat with judo students after a belt exam" loading="lazy"><figcaption data-en="Belt exams with my students">מבחני חגורות עם התלמידים שלי</figcaption></figure>
+      <figure><img src="images/judo-teaching-2.webp" alt="ענת עם קבוצת תלמידי ג'ודו צעירים" data-en-alt="Anat with a young judo group" loading="lazy"><figcaption data-en="The young group · June 2026">הקבוצה הצעירה · יוני 2026</figcaption></figure>
+      <figure class="wide"><img src="images/judo-beach-camp.webp" alt="מחנה אימונים של ג'ודו על חוף הים" data-en-alt="Judo training camp on the beach" loading="lazy"><figcaption data-en="Judo training camp at the beach (circled in green)">מחנה אימונים של ג'ודו בים (מסומנת בירוק)</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- AGE 17 -->
+<section id="seventeen" data-bg="#2a1f0d" data-age="17" data-label="גיל 17" data-label-en="Age 17">
+  <div class="inner">
+    <div class="reveal">
+      <div class="kicker" data-en="Founder mode">מצב יזמית</div>
+      <h2 data-en="3 startups">3 סטארטאפים</h2>
+      <p class="lead" data-en="Taking an idea and turning it into a working product.">לוקחת רעיון והופכת אותו למוצר עובד.</p>
+      <div class="cards">
+        <div class="card"><div class="ico">♻️</div><span class="tag" data-en="Startup">סטארטאפ</span><h4>Bottles</h4><p data-en="Partnering with the municipality.">בשותפות עם העירייה.</p></div>
+        <div class="card"><div class="ico">✅</div><span class="tag" data-en="Startup">סטארטאפ</span><h4 data-en="Nochechut">נוכחות</h4><p data-en="An attendance app for community centers.">אפליקציית נוכחות למתנ"סים.</p></div>
+        <div class="card"><div class="ico">🚗</div><span class="tag" data-en="Startup">סטארטאפ</span><h4 data-en="Nahagti">נהגתי</h4><p data-en="An app that helps driving teachers organize their lessons and students.">אפליקציה למורי נהיגה, לארגון וניהול השיעורים והתלמידים.</p></div>
+      </div>
+    </div>
+    <div class="reveal">
+      <h3 data-en="My cyber journey toward the army">המסע שלי לסייבר בצבא</h3>
+      <p class="lead" data-en="Networks, communications and security, on the way to my service.">רשתות, תקשורת ואבטחת מידע, בדרך לשירות.</p>
+      <div class="cards">
+        <div class="card"><div class="ico">🛡️</div><span class="tag" data-en="Program">תוכנית</span><h4 data-en="Gamma Cyber">גמא סייבר</h4><p data-en="Cyber training program.">תוכנית הכשרה בסייבר.</p></div>
+        <div class="card"><div class="ico">✈️</div><span class="tag" data-en="Program">תוכנית</span><h4 data-en="Shchakim">שחקים</h4><p data-en="Part of my path to the army.">חלק מהמסע שלי לצבא.</p></div>
+        <div class="card"><div class="ico">🌐</div><span class="tag" data-en="Certification">הסמכה</span><h4>CCNA</h4><p data-en="Cisco networking.">רשתות תקשורת של Cisco.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOBBIES -->
+<section id="hobbies" data-bg="#1a1030" data-age="❤" data-age-lbl="תחביבים" data-age-lbl-en="Hobbies" data-label="תחביבים" data-label-en="Hobbies">
+  <div class="inner">
+    <div class="reveal">
+      <div class="kicker" data-en="Outside the CV">מחוץ לקורות החיים</div>
+      <h2 data-en="My hobbies">התחביבים שלי</h2>
+      <div class="cards">
+        <div class="card"><div class="ico">🌍</div><h4 data-en="Traveling">טיולים</h4><p data-en="I love traveling and I've been to <b>20+ countries</b>. I collect a flag pin from every country on my backpack.">אני אוהבת לטייל וביקרתי ביותר מ-<b>20 מדינות</b>. מכל מדינה אני אוספת סיכת דגל לתיק הגב שלי.</p></div>
+        <div class="card"><div class="ico">🛼</div><h4 data-en="Roller skating">רולר</h4><p data-en="I've skated <b>50+ km</b> in one go more than twice.">החלקתי יותר מ-<b>50 ק"מ</b> ברצף יותר מפעמיים.</p></div>
+        <div class="card"><div class="ico">⛷️</div><h4 data-en="Skiing">סקי</h4><p data-en="Since age 12, on my way to becoming an instructor.">מגיל 12, בדרך להיות מדריכה.</p></div>
+        <div class="card"><div class="ico">🥋</div><h4 data-en="Judo">ג'ודו</h4><p data-en="Training, competing and teaching.">מתאמנת, מתחרה ומלמדת.</p></div>
+      </div>
+    </div>
+    <!-- backpack photo: save it as images/backpack-pins.jpg and it shows up here automatically -->
+    <div class="gallery reveal">
+      <figure class="single" style="max-width:520px"><img src="images/backpack-pins.jpg" alt="תיק הגב שלי עם סיכות דגלים של המדינות שביקרתי בהן" data-en-alt="My backpack with flag pins from the countries I've visited" loading="lazy" onerror="this.closest('figure').remove()"><figcaption data-en="My backpack, one flag pin per country">תיק הגב שלי, סיכת דגל מכל מדינה</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<!-- TODAY -->
+<section id="today" data-bg="#101826" data-age="17" data-age-lbl="היום" data-age-lbl-en="Today" data-label="היום" data-label-en="Today">
+  <div class="inner reveal">
+    <div class="kicker" data-en="Today">היום</div>
+    <h2 data-en="In short">בקצרה</h2>
+    <ul class="facts">
+      <li data-en="🥇 Israel <b>Sambo</b> champion">🥇 אלופת ישראל <b>בסמבו</b></li>
+      <li data-en="🥋 Certified <b>judo</b> instructor">🥋 מדריכת <b>ג'ודו</b> מוסמכת</li>
+      <li data-en="⛷️ Ski instructor <b>in the making</b>">⛷️ בדרך להיות <b>מדריכת סקי</b></li>
+      <li data-en="🧠 Gifted · P.L.A. · Amirim · <b>Bar-Ilan</b>">🧠 מחוננים · פ.ל.א. · אמירים · <b>בר-אילן</b></li>
+      <li data-en="💻 Software engineering <b>10 units</b>">💻 הנדסת תוכנה <b>10 יח"ל</b></li>
+      <li data-en="📐 Math & physics <b>5 units</b>">📐 מתמטיקה ופיזיקה <b>5 יח"ל</b></li>
+      <li data-en="🚀 <b>Bottles</b> · Nochechut · Nahagti">🚀 <b>Bottles</b> · נוכחות · נהגתי</li>
+      <li data-en="🛡️ Gamma Cyber · Shchakim · <b>CCNA</b>">🛡️ גמא סייבר · שחקים · <b>CCNA</b></li>
+      <li data-en="🌍 <b>20+</b> countries">🌍 <b>20+</b> מדינות</li>
+      <li data-en="🛼 <b>50+ km</b> on roller skates">🛼 <b>50+ ק"מ</b> ברולר</li>
+      <li data-en="🗣️ Hebrew · Russian · English <b>fluent</b>">🗣️ עברית · רוסית · אנגלית <b>שוטפת</b></li>
+      <li data-en="🇫🇷 French <b>in progress</b>">🇫🇷 צרפתית <b>בלמידה</b></li>
+    </ul>
+  </div>
+</section>
+
+<footer data-en="© Anat Raykhtsin">© ענת רייכצין</footer>
+
+<div id="lb" role="dialog" aria-modal="true">
+  <button id="lbClose" type="button" aria-label="סגירה">✕</button>
+  <button id="lbPrev" type="button" aria-label="הקודמת">‹</button>
+  <img alt="">
+  <div class="cap"></div>
+  <button id="lbNext" type="button" aria-label="הבאה">›</button>
+</div>
 
 <script>
-  /* ── CURSOR ──────────────────────────────────── */
-  const cur = document.getElementById('cursor');
-  const trail = document.getElementById('cursor-trail');
-  document.addEventListener('mousemove', e => {
-    cur.style.left = e.clientX - 7 + 'px';
-    cur.style.top  = e.clientY - 7 + 'px';
-    setTimeout(() => {
-      trail.style.left = e.clientX - 18 + 'px';
-      trail.style.top  = e.clientY - 18 + 'px';
-    }, 60);
-  });
+  /* ---------- language ---------- */
+  let lang='he';
+  const tr=[...document.querySelectorAll('[data-en]')];
+  tr.forEach(el=>el.dataset.he=el.innerHTML);
+  const alts=[...document.querySelectorAll('[data-en-alt]')];
+  alts.forEach(el=>el.dataset.heAlt=el.alt);
+  function setLang(l){
+    lang=l;
+    document.documentElement.lang=l;
+    document.documentElement.dir=l==='he'?'rtl':'ltr';
+    tr.forEach(el=>el.innerHTML=l==='he'?el.dataset.he:el.dataset.en);
+    alts.forEach(el=>el.alt=l==='he'?el.dataset.heAlt:el.dataset.enAlt);
+    document.getElementById('lang').textContent=l==='he'?'English':'עברית';
+    document.title=l==='he'?'ענת רייכצין':'Anat Raykhtsin';
+    buildRail(); updateDial(current,true);
+    try{localStorage.setItem('lang',l)}catch(e){}
+  }
+  document.getElementById('lang').addEventListener('click',()=>setLang(lang==='he'?'en':'he'));
 
-  /* ── PROGRESS BAR ────────────────────────────── */
-  const bar = document.getElementById('progress-bar');
-  window.addEventListener('scroll', () => {
-    const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight) * 100;
-    bar.style.width = pct + '%';
-  });
-
-  /* ── SCROLL REVEAL ───────────────────────────── */
-  const blocks = document.querySelectorAll('.year-block');
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) e.target.classList.add('visible');
+  /* ---------- rail ---------- */
+  const sections=[...document.querySelectorAll('section')];
+  const rail=document.getElementById('rail');
+  function buildRail(){
+    rail.innerHTML='';
+    sections.forEach(s=>{
+      const a=document.createElement('a'), t=lang==='he'?s.dataset.label:s.dataset.labelEn;
+      a.href='#'+s.id; a.innerHTML='<span>'+t+'</span>'; a.setAttribute('aria-label',t);
+      if(s===current)a.classList.add('active');
+      rail.appendChild(a);
     });
-  }, { threshold: 0.15 });
-  blocks.forEach(b => obs.observe(b));
-
-  /* ── SIDE NAV PIPS ───────────────────────────── */
-  const nav = document.getElementById('age-indicator');
-  for (let i = 0; i <= 16; i++) {
-    const pip = document.createElement('div');
-    pip.className = 'age-pip';
-    pip.title = `Age ${i}`;
-    pip.addEventListener('click', () => {
-      document.getElementById(`age-${i}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-    nav.appendChild(pip);
   }
 
-  const pipEls = document.querySelectorAll('.age-pip');
-  const ageObs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        const idx = parseInt(e.target.dataset.age);
-        pipEls.forEach((p, i) => p.classList.toggle('active', i === idx));
-      }
-    });
-  }, { threshold: 0.5 });
-  blocks.forEach(b => ageObs.observe(b));
+  /* ---------- half-circle age dial ---------- */
+  const dial=document.getElementById('ageDial'), dLbl=dial.querySelector('.lbl'), dNum=dial.querySelector('.num');
+  let current=sections[0];
+  function updateDial(s,force){
+    if(!s.dataset.age){dial.classList.remove('show');return}
+    dial.classList.add('show');
+    const lbl=lang==='he'
+      ? (s.dataset.ageLbl || (s.dataset.age.includes('–')?'גילאי':'גיל'))
+      : (s.dataset.ageLblEn || (s.dataset.age.includes('–')?'Ages':'Age'));
+    if(!force && dNum.textContent===s.dataset.age && dLbl.textContent===lbl)return;
+    dNum.classList.add('swap');
+    setTimeout(()=>{dNum.textContent=s.dataset.age;dLbl.textContent=lbl;dNum.classList.remove('swap')},force?0:250);
+  }
 
-  /* ── CARD TILT ON HOVER ──────────────────────── */
-  document.querySelectorAll('.year-card').forEach(card => {
-    card.addEventListener('mousemove', e => {
-      const r = card.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width  - .5;
-      const y = (e.clientY - r.top)  / r.height - .5;
-      card.style.transform = `translateY(-4px) rotateY(${x * 4}deg) rotateX(${-y * 4}deg)`;
+  /* active chapter → background, rail dot, dial */
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(!e.isIntersecting)return;
+      current=e.target;
+      document.body.style.backgroundColor=current.dataset.bg;
+      [...rail.children].forEach((d,i)=>d.classList.toggle('active',sections[i]===current));
+      updateDial(current);
     });
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = '';
-    });
+  },{rootMargin:'-45% 0px -45% 0px'});
+  sections.forEach(s=>io.observe(s));
+
+  /* fade-in */
+  const rv=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rv.unobserve(e.target)}}),{threshold:0,rootMargin:'0px 0px -10% 0px'});
+  document.querySelectorAll('.reveal').forEach(el=>rv.observe(el));
+
+  /* progress bar */
+  const bar=document.getElementById('progress');
+  const onScroll=()=>{const h=document.documentElement;bar.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'};
+  addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+  /* ---------- lightbox: click a photo to enlarge ---------- */
+  const lb=document.getElementById('lb'), lbImg=lb.querySelector('img'), lbCap=lb.querySelector('.cap');
+  let idx=0;
+  const figs=()=>[...document.querySelectorAll('figure')];
+  function show(i){
+    const f=figs(); idx=(i+f.length)%f.length;
+    const img=f[idx].querySelector('img');
+    lbImg.src=img.src; lbImg.alt=img.alt; lbCap.textContent=f[idx].querySelector('figcaption')?.textContent||'';
+    lb.classList.add('open'); document.body.style.overflow='hidden';
+  }
+  function close(){lb.classList.remove('open');document.body.style.overflow=''}
+  document.addEventListener('click',e=>{const f=e.target.closest('figure');if(f)show(figs().indexOf(f))});
+  document.getElementById('lbClose').onclick=close;
+  document.getElementById('lbPrev').onclick=e=>{e.stopPropagation();show(idx-1)};
+  document.getElementById('lbNext').onclick=e=>{e.stopPropagation();show(idx+1)};
+  lb.addEventListener('click',e=>{if(e.target===lb)close()});
+  addEventListener('keydown',e=>{
+    if(!lb.classList.contains('open'))return;
+    if(e.key==='Escape')close();
+    if(e.key==='ArrowLeft')show(idx+(lang==='he'?1:-1));
+    if(e.key==='ArrowRight')show(idx+(lang==='he'?-1:1));
   });
+
+  /* start: Hebrew by default; ?lang=en or a saved choice switches to English */
+  buildRail();
+  let start=new URLSearchParams(location.search).get('lang');
+  if(!start){try{start=localStorage.getItem('lang')}catch(e){}}
+  if(start==='en')setLang('en');
 </script>
 </body>
 </html>
